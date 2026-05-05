@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseCliArgs } from "../src/cli";
+import { parseCliArgs, resolveWrapperArgs } from "../src/cli";
 
 describe("parseCliArgs", () => {
   it("parses wrapper commands as passthrough", () => {
@@ -13,5 +13,15 @@ describe("parseCliArgs", () => {
     const parsed = parseCliArgs(["bootstrap", "--apply"]);
     expect(parsed.kind).toBe("bootstrap");
     expect(parsed.slashCommand).toBe("/aiduo:bootstrap --apply");
+  });
+
+  it("keeps claude passthrough untouched when no explicit args are given", () => {
+    expect(resolveWrapperArgs("claude", [])).toEqual([]);
+  });
+
+  it("keeps codex passthrough untouched", () => {
+    expect(resolveWrapperArgs("codex", [])).toEqual([]);
+    expect(resolveWrapperArgs("codex", ["exec", "--resume"])).toEqual(["exec", "--resume"]);
+    expect(resolveWrapperArgs("codex", ["--resume"])).toEqual(["--resume"]);
   });
 });

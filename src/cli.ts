@@ -18,6 +18,13 @@ export interface ParsedCliArgs {
   slashCommand?: string;
 }
 
+export function resolveWrapperArgs(
+  _agent: "claude" | "codex",
+  passthroughArgs: string[]
+): string[] {
+  return passthroughArgs;
+}
+
 export function parseCliArgs(argv: string[]): ParsedCliArgs {
   const [command, ...rest] = argv;
   if (!command || command === "help" || command === "--help" || command === "-h") {
@@ -55,11 +62,24 @@ function printCliHelp(): void {
       "AI Duo CLI",
       "",
       "Usage:",
+      "  aiduo claude",
+      "  aiduo codex",
       "  aiduo claude [claude args...]",
       "  aiduo codex [codex args...]",
       "  aiduo status",
       "  aiduo latest",
       "  aiduo bootstrap [--apply]",
+      "",
+      "Notes:",
+      "  - aiduo only wraps Claude and Codex terminals.",
+      "  - all extra arguments are passed through unchanged.",
+      "  - slash commands are used inside the wrapped session.",
+      "",
+      "Examples:",
+      "  aiduo claude --resume",
+      "  aiduo codex exec",
+      "  /aiduo:review --diff",
+      "  /aiduo:plan",
       ""
     ].join("\n")
   );
@@ -127,7 +147,7 @@ async function main(): Promise<void> {
     case "wrap":
       await wrapSession({
         agent: parsed.agent!,
-        args: parsed.passthroughArgs,
+        args: resolveWrapperArgs(parsed.agent!, parsed.passthroughArgs),
         cwd: cwd()
       });
       return;
