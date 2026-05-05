@@ -4,9 +4,10 @@ AI Duo Orchestrator is a terminal-first wrapper for Claude and Codex sessions. Y
 
 ## Quick Start
 
-After npm publish, the intended entrypoint is:
+Published package:
 
 ```bash
+npx aiduo help
 npx aiduo claude
 npx aiduo codex
 ```
@@ -50,6 +51,21 @@ Inside one of those sessions:
 /aiduo:review --diff
 ```
 
+## Install
+
+No global install is required:
+
+```bash
+npx aiduo help
+```
+
+Optional local install:
+
+```bash
+npm install -g aiduo
+aiduo help
+```
+
 ## Slash Commands
 
 Core commands:
@@ -82,7 +98,9 @@ Common examples:
 /aiduo:judge
 ```
 
-Detailed usage examples live in [terminal-usage.md](/Users/yajinn/Desktop/Projects/AIDuo/docs/terminal-usage.md).
+Detailed usage examples:
+
+- [Terminal usage guide](https://github.com/yajinn/AIDuoOrchestrator/blob/main/docs/terminal-usage.md)
 
 ## Top-Level Helper Commands
 
@@ -133,12 +151,11 @@ What is stored there:
 
 - wrapper input is line-oriented, not full raw-terminal passthrough
 - pairing is automatic by repo and latest opposite session; manual pairing flags are not added yet
-- npm registry publish is still pending
 - MCP sidecar and richer multi-session coordination are still future work
 
 ## Local Repo Usage
 
-Before npm publish, you can still run it from this repo:
+You can also run it directly from the repository:
 
 ```bash
 npm install
@@ -171,7 +188,3 @@ npm test
 npm run build
 npm run lint
 ```
-
-## Spec
-
-The current terminal-first product direction is documented in [PRD-v3-terminal.md](/Users/yajinn/Desktop/Projects/AIDuo/PRD-v3-terminal.md).

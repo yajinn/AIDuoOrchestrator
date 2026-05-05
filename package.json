@@ -1,7 +1,7 @@
 {
   "name": "aiduo",
   "description": "Terminal-first protocol and runtime for Claude and Codex pair workflows.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "UNLICENSED",
   "main": "./dist/orchestrator.js",
   "bin": {
@@ -9,8 +9,7 @@
   },
   "files": [
     "dist",
-    "README.md",
-    "PRD-v3-terminal.md"
+    "README.md"
   ],
   "repository": {
     "type": "git",
