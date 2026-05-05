@@ -1,8 +1,16 @@
 import * as vscode from "vscode";
 import { join } from "node:path";
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { createRunArtifacts, type FlowId } from "./artifacts";
+import {
+  applyBootstrapPlan,
+  loadBootstrapExistingFiles,
+  planBootstrapOperations,
+  renderBootstrapPreview
+} from "./bootstrap";
 import { collectCapabilitySnapshot, checkFlowSupport } from "./capabilities";
+import { runProcess } from "./utils/process";
+import { executeFlow } from "./orchestrator";
 import { routeTask } from "./router";
 import { renderSummary } from "./summary";
 
@@ -18,6 +26,8 @@ const COMMANDS = [
 interface CommandDependencies {
   output: vscode.OutputChannel;
 }
+
+let activeRunController: AbortController | undefined;
 
 interface FlowOption {
   label: string;
@@ -60,6 +70,15 @@ function summarizeCapabilityReasons(reasons: string[]): string[] {
   return reasons.length > 0 ? reasons : ["Capability check passed."];
 }
 
+async function detectHasDiff(workspaceRoot: string): Promise<boolean> {
+  try {
+    const status = await runProcess("git", ["status", "--short"], workspaceRoot);
+    return status.stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
 async function startRun(
   requestedFlowId: FlowId,
   dependencies: CommandDependencies,
@@ -79,13 +98,66 @@ async function startRun(
 
   dependencies.output.appendLine(`Collecting capabilities for requested flow: ${requestedFlowId}`);
   const capabilitySnapshot = await collectCapabilitySnapshot();
+  const hasDiff = await detectHasDiff(workspaceRoot);
 
   const flowDecision =
     requestedFlowId === "auto"
-      ? routeTask(task, { hasDiff: false })
+      ? routeTask(task, { hasDiff })
       : { flowId: requestedFlowId, reason: "User selected the flow explicitly." };
 
   const support = checkFlowSupport(flowDecision.flowId, capabilitySnapshot);
+
+  if (support.supported) {
+    if (flowDecision.flowId === "auto") {
+      throw new Error("Auto flow must resolve to a concrete flow before execution.");
+    }
+
+    const concreteFlowId = flowDecision.flowId;
+    const controller = new AbortController();
+    activeRunController = controller;
+
+    try {
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: `AI Duo: ${flowDecision.flowId}`,
+          cancellable: true
+        },
+        async (progress, token) => {
+          token.onCancellationRequested(() => controller.abort());
+          progress.report({ message: "Executing flow" });
+
+          const result = await executeFlow({
+            workspaceRoot,
+            flowId: concreteFlowId,
+            task,
+            signal: controller.signal
+          });
+
+          await writeFile(
+            join(result.runArtifacts.runDir, "00-capabilities.json"),
+            `${JSON.stringify(capabilitySnapshot, null, 2)}\n`,
+            "utf8"
+          );
+
+          dependencies.output.appendLine(
+            `Run ${result.runArtifacts.runId} completed with state ${result.flowResult.finalState}.`
+          );
+
+          await openMarkdownFile(result.runArtifacts.latestPath);
+        }
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      dependencies.output.appendLine(`Flow failed: ${message}`);
+      await vscode.window.showErrorMessage(`AI Duo flow failed: ${message}`);
+    } finally {
+      activeRunController = undefined;
+    }
+
+    return;
+  }
+
   const runArtifacts = await createRunArtifacts({
     workspaceRoot,
     flowId: flowDecision.flowId,
@@ -175,10 +247,42 @@ export function registerCommands(context: vscode.ExtensionContext, dependencies:
           return;
         }
         case "aiDuo.bootstrapProjectRules":
-          await vscode.window.showInformationMessage("Bootstrap scaffolding exists, but project rule generation is not implemented yet.");
-          return;
+          {
+            const workspaceRoot = getWorkspaceRoot();
+            if (!workspaceRoot) {
+              await vscode.window.showErrorMessage("Open a workspace folder before bootstrapping AI Duo rules.");
+              return;
+            }
+
+            const existingFiles = await loadBootstrapExistingFiles(workspaceRoot);
+            const plan = planBootstrapOperations({ existingFiles });
+            const previewPath = join(workspaceRoot, ".ai-duo", "bootstrap-preview.md");
+            await mkdir(join(workspaceRoot, ".ai-duo"), { recursive: true });
+            await writeFile(previewPath, renderBootstrapPreview(plan), "utf8");
+            await openMarkdownFile(previewPath);
+
+            const confirmation = await vscode.window.showInformationMessage(
+              `Bootstrap preview ready. Apply ${plan.created + plan.updated} file changes?`,
+              "Apply",
+              "Cancel"
+            );
+
+            if (confirmation !== "Apply") {
+              return;
+            }
+
+            const applied = await applyBootstrapPlan(workspaceRoot, plan);
+            await vscode.window.showInformationMessage(`Applied ${applied.length} AI Duo bootstrap changes.`);
+            return;
+          }
         case "aiDuo.cancel":
-          await vscode.window.showInformationMessage("No active child process is registered yet.");
+          if (!activeRunController) {
+            await vscode.window.showInformationMessage("No active AI Duo run exists.");
+            return;
+          }
+
+          activeRunController.abort();
+          await vscode.window.showWarningMessage("AI Duo run cancellation requested.");
           return;
         default:
           await vscode.window.showInformationMessage("AI Duo command registered.");

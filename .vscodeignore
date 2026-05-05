@@ -6,3 +6,4 @@ CLAUDE.md
 tsconfig.json
 vitest.config.mts
 node_modules/**
+.ai-duo/**
