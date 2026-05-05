@@ -28,6 +28,13 @@ npm run build
 npx --yes . help
 ```
 
+Direct GitHub `npx` usage after pushing:
+
+```bash
+npx --yes github:yajinn/AIDuoOrchestrator help
+npx --yes github:yajinn/AIDuoOrchestrator bootstrap
+```
+
 After publishing the package, the intended registry form is:
 
 ```bash

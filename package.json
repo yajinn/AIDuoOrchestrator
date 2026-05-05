@@ -12,10 +12,15 @@
     "README.md",
     "PRD-v3-terminal.md"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yajinn/AIDuoOrchestrator.git"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist coverage .vitest",
     "lint": "tsc --noEmit -p tsconfig.json",
+    "prepare": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest"
   },
