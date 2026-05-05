@@ -1,11 +1,11 @@
 {
-  "name": "ai-duo-orchestrator",
+  "name": "aiduo",
   "description": "Terminal-first protocol and runtime for Claude and Codex pair workflows.",
   "version": "0.1.0",
   "license": "UNLICENSED",
   "main": "./dist/orchestrator.js",
   "bin": {
-    "aiduo": "./dist/cli.js"
+    "aiduo": "dist/cli.js"
   },
   "files": [
     "dist",
@@ -14,7 +14,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/yajinn/AIDuoOrchestrator.git"
+    "url": "git+https://github.com/yajinn/AIDuoOrchestrator.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

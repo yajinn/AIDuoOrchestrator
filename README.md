@@ -38,7 +38,9 @@ npx --yes github:yajinn/AIDuoOrchestrator bootstrap
 After publishing the package, the intended registry form is:
 
 ```bash
-npx ai-duo-orchestrator help
+npx aiduo help
+npx aiduo claude --resume
+npx aiduo codex exec
 ```
 
 Optional global link for local use:
@@ -61,7 +63,7 @@ aiduo help
 
 - wrapper input is line-oriented, not full raw-terminal passthrough
 - pairing is automatic by repo and latest opposite session; manual pairing flags are not added yet
-- top-level `npx aiduo ...` still requires either local repo execution or future npm publish
+- npm registry publish is still pending
 - MCP sidecar and richer multi-session coordination are still future work
 
 ## Local Development
