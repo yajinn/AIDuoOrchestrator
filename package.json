@@ -1,68 +1,30 @@
 {
   "name": "ai-duo-orchestrator",
-  "displayName": "AI Duo Orchestrator",
-  "description": "Local multi-agent orchestration for Claude Code and Codex inside Cursor and VS Code-compatible editors.",
+  "description": "Terminal-first protocol and runtime for Claude and Codex pair workflows.",
   "version": "0.1.0",
-  "private": true,
-  "publisher": "local",
   "license": "UNLICENSED",
-  "engines": {
-    "vscode": "^1.100.0"
+  "main": "./dist/orchestrator.js",
+  "bin": {
+    "aiduo": "./dist/cli.js"
   },
-  "categories": [
-    "Other"
+  "files": [
+    "dist",
+    "README.md",
+    "PRD-v3-terminal.md"
   ],
-  "activationEvents": [
-    "onCommand:aiDuo.run",
-    "onCommand:aiDuo.reviewCurrentDiff",
-    "onCommand:aiDuo.planDebate",
-    "onCommand:aiDuo.openLatestTimeline",
-    "onCommand:aiDuo.bootstrapProjectRules",
-    "onCommand:aiDuo.cancel",
-    "onStartupFinished"
-  ],
-  "main": "./dist/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "aiDuo.run",
-        "title": "AI Duo: Run"
-      },
-      {
-        "command": "aiDuo.reviewCurrentDiff",
-        "title": "AI Duo: Review Current Diff"
-      },
-      {
-        "command": "aiDuo.planDebate",
-        "title": "AI Duo: Plan Debate"
-      },
-      {
-        "command": "aiDuo.openLatestTimeline",
-        "title": "AI Duo: Open Latest Timeline"
-      },
-      {
-        "command": "aiDuo.bootstrapProjectRules",
-        "title": "AI Duo: Bootstrap Project Rules"
-      },
-      {
-        "command": "aiDuo.cancel",
-        "title": "AI Duo: Cancel Running Flow"
-      }
-    ]
-  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist coverage .vitest",
     "lint": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "package": "npm run build && npx @vscode/vsce package --allow-missing-repository"
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@types/node": "^22.15.29",
-    "@types/vscode": "^1.100.0",
-    "@vscode/vsce": "^3.6.2",
     "typescript": "^5.8.3",
     "vitest": "^3.1.4"
+  },
+  "dependencies": {
+    "node-pty": "^1.1.0"
   }
 }

@@ -8,7 +8,14 @@ export type FlowId =
   | "claude-impl"
   | "codex-impl"
   | "dual-review"
-  | "dual-plan";
+  | "dual-plan"
+  | "review"
+  | "implement"
+  | "plan"
+  | "fix"
+  | "judge"
+  | "retry"
+  | "bootstrap";
 
 export type RunStatus =
   | "running"

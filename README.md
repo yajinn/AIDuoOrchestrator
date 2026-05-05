@@ -1,43 +1,61 @@
 # AI Duo Orchestrator
 
-AI Duo Orchestrator is a local VS Code-compatible extension for bounded Claude Code and Codex workflows inside Cursor.
+AI Duo Orchestrator is a terminal-first protocol and local runtime for Claude and Codex pair workflows.
 
 ## Current State
 
-This repository currently contains the MVP foundation:
+This repository currently contains a working terminal-first CLI foundation:
 
-- extension scaffold
-- command registrations
-- capability probe for Claude and Codex
+- `aiduo` CLI entrypoint with `claude` and `codex` wrapper commands
+- file-backed session registry and transcript runtime under `.ai-duo/runtime`
+- slash-command parser for `/aiduo:*`
 - artifact engine for `.ai-duo/runs/<id>`
-- structured control schema validation
-- core flow state machines for `claude-impl` and `dual-review`
+- bootstrap preview and apply helpers
 - prompt sanitization and secret redaction helpers
-- Markdown summary rendering for stop states
+- retained non-interactive orchestration modules and tests
 
-## Commands
+## Current Focus
 
-- `AI Duo: Run`
-- `AI Duo: Review Current Diff`
-- `AI Duo: Plan Debate`
-- `AI Duo: Open Latest Timeline`
-- `AI Duo: Bootstrap Project Rules`
-- `AI Duo: Cancel Running Flow`
+The current focus is the wrapper-driven terminal workflow described in [PRD-v3-terminal.md](/Users/yajinn/Desktop/Projects/AIDuo/PRD-v3-terminal.md).
+
+## Install
+
+Local development install:
+
+```bash
+npm install
+npm run build
+npx --yes . help
+```
+
+After publishing the package, the intended registry form is:
+
+```bash
+npx ai-duo-orchestrator help
+```
+
+Optional global link for local use:
+
+```bash
+npm link
+aiduo help
+```
 
 ## What Works Today
 
-- capability probe and flow support checks
-- run scaffolding and artifact creation
-- latest summary opening in the editor
-- VSIX packaging
+- `aiduo claude ...` and `aiduo codex ...` PTY wrappers
+- `/aiduo:review`, `/aiduo:implement`, `/aiduo:plan`, `/aiduo:fix`, `/aiduo:judge`
+- `/aiduo:status`, `/aiduo:latest`, `/aiduo:cancel`, `/aiduo:retry`, `/aiduo:bootstrap`, `/aiduo:help`
+- peer-session pairing within the same repo
+- transcript-backed context resolution with `--diff` and `--all`
+- run artifacts and `.ai-duo/latest.md`
 
-## Not Implemented Yet
+## Current Limitations
 
-- real Claude runner execution
-- real Codex runner execution
-- bootstrap file generation
-- user edit filesystem watcher wiring
-- reversal patch generation
+- wrapper input is line-oriented, not full raw-terminal passthrough
+- pairing is automatic by repo and latest opposite session; manual pairing flags are not added yet
+- top-level `npx aiduo ...` still requires either local repo execution or future npm publish
+- MCP sidecar and richer multi-session coordination are still future work
 
 ## Local Development
 
@@ -46,5 +64,4 @@ npm install
 npm test
 npm run build
 npm run lint
-npm run package
 ```
